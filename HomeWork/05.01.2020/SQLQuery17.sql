@@ -1,0 +1,225 @@
+--GO
+--CREATE DATABASE HN_21_01_2020
+--GO
+--USE HN_21_01_2020
+--GO
+--create table [Departments]
+--(
+--	[Id] int not null identity(1, 1) primary key,
+--	[Building] int not null check ([Building] between 1 and 5),
+--	[Name] nvarchar(100) not null unique check ([Name] <> N'')
+--);
+--go
+
+--create table [Doctors]
+--(
+--	[Id] int not null identity(1, 1) primary key,
+--	[Name] nvarchar(max) not null check ([Name] <> N''),
+--	[Premium] money not null check ([Premium] >= 0.0) default 0.0,
+--	[Salary] money not null check ([Salary] > 0.0),
+--	[Surname] nvarchar(max) not null check ([Surname] <> N'')
+--);
+--go
+
+--create table [DoctorsExaminations]
+--(
+--	[Id] int not null identity(1, 1) primary key,
+--	[EndTime] time not null,
+--	[StartTime] time not null check ([StartTime] between '08:00' and '18:00'),
+--	[DoctorId] int not null,
+--	[ExaminationId] int not null,
+--	[WardId] int not null,
+--	check ([StartTime] < [EndTime])
+--);
+--go
+
+--create table [Examinations]
+--(
+--	[Id] int not null identity(1, 1) primary key,
+--	[Name] nvarchar(100) not null unique check ([Name] <> N'')
+--);
+--go
+
+--create table [Wards]
+--(
+--	[Id] int not null identity(1, 1) primary key,
+--	[Name] nvarchar(20) not null unique check ([Name] <> N''),
+--	[Places] int not null check ([Places] >= 1),
+--	[DepartmentId] int not null
+--);
+--go
+
+--alter table [DoctorsExaminations]
+--add foreign key ([DoctorId]) references [Doctors]([Id]);
+--go
+
+--alter table [DoctorsExaminations]
+--add foreign key ([ExaminationId]) references [Examinations]([Id]);
+--go
+
+--alter table [DoctorsExaminations]
+--add foreign key ([WardId]) references [Wards]([Id]);
+--go
+
+--alter table [Wards]
+--add foreign key ([DepartmentId]) references [Departments]([Id]);
+--go
+
+----------------------------------------------------------------------------------------------
+--GO 
+--INSERT Departments
+--VALUES
+--(1,'DP_1'),
+--(2,'DP_2'),
+--(1,'DP_3'),
+--(1,'DP_4'),
+--(2,'DP_5')
+--GO 
+--INSERT Wards
+--VALUES
+--('W1',3,1),
+--('W2',11,1),
+--('W3',13,2),
+--('W4',6,2),
+--('W5',3,1)
+--GO
+--INSERT Doctors
+--VALUES
+--('ROB',100,1000,'KOLOBKO'),
+--('ALEX',50,900,'GRICH'),
+--('ADAN',150,1500,'Smith'),
+--('GUNNY',200,1800,'Williams'),
+--('JADA',125,800,'Miller')
+--GO
+--INSERT Examinations
+--VALUES
+--('E1'),
+--('E2'),
+--('E3'),
+--('E4')
+--GO
+--INSERT DoctorsExaminations
+--VALUES
+--('20:00','10:00',1,1,1),
+--('20:00','10:00',2,2,1),
+--('20:00','10:00',3,3,2),
+--('20:00','10:00',4,3,3),
+--('20:00','10:00',5,4,4),
+--('22:00','11:00',1,2,2),
+--('19:00','10:00',2,3,3),
+--('18:00','9:00',2,4,3),
+--('18:00','8:00',2,4,3)
+
+-------------------------------------------------------------------------
+
+----------Views-------------
+-----------------TASK_1
+--GO
+--CREATE VIEW T1 
+--AS
+--SELECT *
+--FROM Doctors
+--GO
+--SELECT *FROM T1
+
+--------------------TASK_2
+--GO
+--CREATE VIEW T2
+--AS
+--SELECT EndTime,StartTime,Examinations.[Name] AS ExaminationName,
+--Doctors.[Name] AS DoctorName,Wards.[Name] AS WardName,
+--Wards.Places AS WardPlaces 
+--FROM DoctorsExaminations
+--INNER JOIN Doctors ON Doctors.Id=DoctorsExaminations.DoctorId
+--INNER JOIN Wards ON Wards.Id= DoctorsExaminations.WardId
+--INNER JOIN Examinations ON Examinations.Id= DoctorsExaminations.ExaminationId
+--GO
+--SELECT * FROM T2
+
+---------------------TASK_3
+--GO
+--CREATE VIEW T3
+--AS
+--SELECT [Name],Places
+--FROM Wards
+--WHERE DepartmentId=1
+--GO
+--SELECT * FROM T3
+
+-------------------------TASK_4
+--GO
+--CREATE VIEW T4
+--AS
+--SELECT TOP(1) D.[Name],D.Premium,D.Salary,D.Surname
+--FROM DoctorsExaminations AS DE
+--INNER JOIN Doctors AS D ON D.Id=DE.DoctorId
+--GROUP BY DE.DoctorId,D.[Name],D.Premium,D.Salary,D.Surname
+--ORDER BY COUNT(DE.DoctorId) DESC
+--GO
+--SELECT * FROM T4
+
+-----------------------TASK_5
+--GO
+--CREATE VIEW T5
+--AS
+--SELECT TOP(3) *
+--FROM Doctors
+--ORDER BY Premium DESC
+--GO
+--SELECT * FROM T5
+
+------------------TASK_6
+--GO
+--CREATE VIEW T6
+--AS
+--SELECT TOP(1) *
+--FROM Doctors
+--ORDER BY Salary DESC
+--GO
+--SELECT * FROM T6
+
+------------------------
+--Stored Procedures------------------------------------------------
+------------------------
+
+----------------TASK_1
+--GO
+--CREATE PROCEDURE T1_P
+--AS
+--SELECT *
+--FROM Wards
+--GO
+--EXECUTE T1_P
+
+-------------------TASK_2
+--GO
+--CREATE PROCEDURE T2_P
+--AS
+--SELECT *, Examinations.[Name]AS ExaminationsName
+--FROM DoctorsExaminations
+--INNER JOIN Examinations ON Examinations.Id= DoctorsExaminations.ExaminationId
+--WHERE DoctorsExaminations.DoctorId=1--<<<-----Doctor id 1-5
+--GO
+--EXECUTE T2_P
+
+---------------TASK_3
+--GO
+--CREATE PROCEDURE T3_P
+--AS
+--SELECT 'Average salary :', AVG(Salary)
+--FROM Doctors
+--GO 
+--EXECUTE T3_P
+
+-------------------TASK_4
+--GO
+--CREATE PROCEDURE T4_P
+--AS
+--SELECT TOP(3) D.[Name],D.Premium,D.Salary,D.Surname
+--FROM DoctorsExaminations AS DE
+--INNER JOIN Doctors AS D ON D.Id=DE.DoctorId
+--GROUP BY DE.DoctorId,D.[Name],D.Premium,D.Salary,D.Surname
+--ORDER BY COUNT(DE.DoctorId) DESC
+--GO
+--EXECUTE T4_P
+
