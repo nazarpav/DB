@@ -40,8 +40,8 @@
 --[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
 --Surname NVARCHAR(100) NOT NULL CHECK (Surname!=''),
 --Patronymic NVARCHAR(100) NOT NULL CHECK (Patronymic!=''),
---Email NVARCHAR(75) NOT NULL UNIQUE CHECK (Email!=''),
---Phone NVARCHAR(15) NOT NULL UNIQUE CHECK (Phone!=''),
+--Email NVARCHAR(75) NOT NULL CHECK (Email!=''),
+--Phone NVARCHAR(15) NOT NULL CHECK (Phone!=''),
 --[Percent Discount] INT NOT NULL CHECK([Percent Discount]>=0AND[Percent Discount]<=100)
 --)
 --GO
@@ -56,14 +56,14 @@
 --CHECK(dbo.CheckCustomerExist_([Customer Email]) = 'True' OR [Customer Email]='Unregistered User')
 --)
 
-----------------------GO
-----------------------CREATE TRIGGER SaleProduct
-----------------------ON Sales
-----------------------AFTER INSERT
-----------------------AS
-----------------------BEGIN
-----------------------IF EXISTS(SELECT [Product Id] FROM inserted WHERE SELECT Id FROM Product = [Product Id])
-----------------------END
+--GO
+--CREATE TRIGGER SaleProduct
+--ON Sales
+--AFTER INSERT
+--AS
+--BEGIN
+--IF EXISTS(SELECT [Product Id] FROM inserted WHERE SELECT Id FROM Product)
+--END
 
 --GO
 --CREATE TABLE Archive
@@ -76,6 +76,11 @@
 --[Sale Price] INT NOT NULL,
 --[Date] DATE NOT NULL
 --)
+
+--GO
+--INSERT Product
+--VALUES
+--('Apple',100,10,'Kiiv',15)
 
 ----------------------GO
 ----------------------INSERT Customers
@@ -101,17 +106,19 @@
 --ON Sales
 --AFTER INSERT
 --AS
+--BEGIN
 --INSERT INTO History ([Name],Quantity,[Sale Price],[Sale Date],[Customer Email])
 --SELECT [Name],Quantity,[Sale Price],[Sale Date],[Customer Email]
 --FROM inserted
+--END
 -----------------
---TEST 
---|||||||
---VVVVV
+----------------TEST 
+----------------|||||||
+----------------VVVVV
 --GO
 --INSERT Sales
 --VALUES
---('Melon',2,50,GETDATE(),'OlegO12@ukr.net')
+--(1,'Apple',2,50,GETDATE(),'OlegO12@ukr.net')
 --GO 
 --SELECT *
 --FROM History
@@ -122,6 +129,37 @@
 -----------------------TASK_2
 
 
+
+---------------------------TASK_3
+CREATE TRIGGER T3
+ON Customers
+AFTER INSERT
+AS
+BEGIN
+DECLARE @Count INT
+SET @Count = (SELECT COUNT(C.Email)
+FROM inserted
+INNER JOIN Customers AS C ON C.Email = inserted.Email
+WHERE C.Email = inserted.Email
+)
+SELECT * FROM INSERTED
+--SET @Count = @Count-1;
+PRINT @Count;
+--IF (@Count!=0)
+IF(Customers = ANY inserted)
+BEGIN
+RAISERROR ( 'You can not add new customer, email must be unique',0,2);
+ROLLBACK TRAN;
+END
+END
+----------------TEST 
+----------------|||||||
+----------------VVVVV
+SELECT Email FROM Customers
+--GO
+INSERT Customers
+VALUES
+('Oleg','Olegenko','Olegovich','OlegO124563@ukr.net','+380687559823',0)
 
 
 -----------------------------------------------------------------------------------------------------------------
