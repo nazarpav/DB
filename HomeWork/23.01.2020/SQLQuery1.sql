@@ -6,7 +6,7 @@
 --RETURNS VARCHAR(5)
 --AS
 --BEGIN
---    IF EXISTS (SELECT* FROM Customers WHERE Email = @Email_)
+--    IF EXISTS (SELECT* FROM Customers WHERE Customers.Email = @Email_)
 --        return 'True'
 --    return 'False'
 --END
@@ -130,26 +130,23 @@
 
 
 
----------------------------TASK_3
-CREATE TRIGGER T3
+-----------------------------TASK_3
+ALTER TRIGGER T3
 ON Customers
 AFTER INSERT
 AS
 BEGIN
-DECLARE @Count INT
-SET @Count = (SELECT COUNT(C.Email)
-FROM inserted
-INNER JOIN Customers AS C ON C.Email = inserted.Email
-WHERE C.Email = inserted.Email
-)
-SELECT * FROM INSERTED
---SET @Count = @Count-1;
+DECLARE @Count INT;
+SET @Count = 0;
 PRINT @Count;
---IF (@Count!=0)
-IF(Customers = ANY inserted)
+SELECT *FROM inserted;
+SET @Count = (SELECT COUNT(Email)FROM inserted WHERE dbo.CheckCustomerExist_(Email)='True');
+SELECT *FROM inserted;
+PRINT @Count;
+IF(@Count != 0)
 BEGIN
-RAISERROR ( 'You can not add new customer, email must be unique',0,2);
-ROLLBACK TRAN;
+	RAISERROR ( 'You can not add new customer, email must be unique',0,2);
+	ROLLBACK TRAN;
 END
 END
 ----------------TEST 
@@ -159,7 +156,9 @@ SELECT Email FROM Customers
 --GO
 INSERT Customers
 VALUES
-('Oleg','Olegenko','Olegovich','OlegO124563@ukr.net','+380687559823',0)
+('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
+('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
+('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0)
 
 
 -----------------------------------------------------------------------------------------------------------------
