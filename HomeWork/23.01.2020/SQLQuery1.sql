@@ -56,14 +56,14 @@
 --CHECK(dbo.CheckCustomerExist_([Customer Email]) = 'True' OR [Customer Email]='Unregistered User')
 --)
 
---GO
---CREATE TRIGGER SaleProduct
---ON Sales
---AFTER INSERT
---AS
---BEGIN
---IF EXISTS(SELECT [Product Id] FROM inserted WHERE SELECT Id FROM Product)
---END
+------------------GO
+------------------CREATE TRIGGER SaleProduct
+------------------ON Sales
+------------------AFTER INSERT
+------------------AS
+------------------BEGIN
+------------------IF EXISTS(SELECT [Product Id] FROM inserted WHERE SELECT Id FROM Product)
+------------------END
 
 --GO
 --CREATE TABLE Archive
