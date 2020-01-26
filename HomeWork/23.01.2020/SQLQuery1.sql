@@ -1,4 +1,12 @@
+
+--+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+--****************         ÏÐÈÌ²ÒÊÀ    7 ÇÀÂÄÀÍÍß ÏÅÐÅÂ²ÐßÒÈ Ï²ÑËß 2
+--****************         ßÊÙÎ ÍÀÎÁÎÐÎÒ ÒÎ ÍÅÂÈÉÄÅ ÏÅÐÅÂ²ÐÈÒÈ Ä²ªÇÄÀÒÍ²ÑÒÜ 2
+
+--+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 --CREATE DATABASE STSHOP
+--USE STSHOP
 --GO
 --CREATE FUNCTION CheckCustomerExist_ (
 --    @Email_ NVARCHAR(75)
@@ -27,7 +35,7 @@
 --Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
 --[Product Id] INT NOT NULL FOREIGN KEY REFERENCES Product,
 --[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
---Quantity INT NOT NULL CHECK(Quantity>0),
+--Quantity INT NOT NULL ,
 --[Sale Price] INT NOT NULL CHECK([Sale Price]>0),
 --[Sale Date] DATE NOT NULL,
 --[Customer Email] NVARCHAR(75) NOT NULL DEFAULT 'Unregistered User'
@@ -56,15 +64,6 @@
 --CHECK(dbo.CheckCustomerExist_([Customer Email]) = 'True' OR [Customer Email]='Unregistered User')
 --)
 
-------------------GO
-------------------CREATE TRIGGER SaleProduct
-------------------ON Sales
-------------------AFTER INSERT
-------------------AS
-------------------BEGIN
-------------------IF EXISTS(SELECT [Product Id] FROM inserted WHERE SELECT Id FROM Product)
-------------------END
-
 --GO
 --CREATE TABLE Archive
 --(
@@ -74,7 +73,7 @@
 --Cost INT NOT NULL,
 --Manufacturer NVARCHAR(150) NOT NULL CHECK (Manufacturer!=''),
 --[Sale Price] INT NOT NULL,
---[Date] DATE NOT NULL
+--[Date] DATE NOT NULL DEFAULT GETDATE()
 --)
 
 --GO
@@ -86,6 +85,12 @@
 ----------------------INSERT Customers
 ----------------------VALUES
 ------------------------('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0)
+--------------INSERT Customers
+--------------VALUES
+--------------('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
+--------------('Oleg','Olegenko','Olegovich','OlegO121@ukr.net','+380687559823',0),
+--------------('Oleg','Olegenko','Olegovich','OlegO122@ukr.net','+380687559823',0),
+--------------('Oleg','Olegenko','Olegovich','OlegO123@ukr.net','+380687559823',0)
 
 ----------------------GO
 ----------------------INSERT Sales ([Name],Quantity,[Sale Price],[Sale Date])
@@ -127,41 +132,199 @@
 --FROM Sales
 
 -----------------------TASK_2
+--GO
+--CREATE TRIGGER T2
+--ON Sales
+--AFTER INSERT
+--AS
+--BEGIN
+--INSERT Archive ([Name],QP_Avaiable,Cost,Manufacturer,[Sale Price])
+--SELECT Product.[Name],Product.QP_Avaiable,
+--Product.Cost,Product.Manufacturer,Product.[Sale Price]
+--FROM inserted
+--INNER JOIN Product ON Product.Id=inserted.[Product Id]
+--WHERE
+--Product.QP_Avaiable = 0
+--------------DELETE FROM Product
+--------------WHERE Product.Id = ANY ( SELECT Product.Id
+--------------FROM inserted
+--------------INNER JOIN Product ON Product.Id=inserted.[Product Id]
+--------------WHERE
+--------------Product.QP_Avaiable = 0)
+--END
+--GO
+--INSERT Product
+--VALUES('Apple',0,0,'SASFDG',12)
+--GO
+--SELECT * FROM Product
+--GO
+--INSERT Sales ([Product Id],[Name],Quantity,[Sale Price],[Sale Date])
+--VALUES (3--<<<<< ID ÏÐÎÄÓÊÒÀ ÑÒÂÎÐÅÍÎÃÎ ÂÈÙÅ ^^^
+--,'Apple',0,10,GETDATE())
+--GO
+--SELECT * FROM Sales
+--GO
+--SELECT * FROM Archive
 
+-----------------------------TASK_3_V1
+------------------------------CREATE TRIGGER T3
+------------------------------ON Customers
+------------------------------INSTEAD OF INSERT
+------------------------------AS
+------------------------------BEGIN
+------------------------------BEGIN TRAN;
+------------------------------DECLARE @Count INT;
+------------------------------SET @Count = (SELECT COUNT(Email)FROM inserted WHERE dbo.CheckCustomerExist_(Email)='True');
+------------------------------IF(@Count != 0)
+------------------------------BEGIN
+------------------------------	RAISERROR ( 'You can not add new customer, email must be unique',0,2);
+------------------------------	ROLLBACK TRAN;
+------------------------------END
+------------------------------ELSE
+------------------------------BEGIN
+------------------------------INSERT Customers ([Name],Surname,Patronymic,Email,Phone,[Percent Discount] )
+------------------------------SELECT [Name],Surname,Patronymic,Email,Phone,[Percent Discount] 
+------------------------------FROM inserted
+------------------------------COMMIT
+------------------------------END
+------------------------------END
 
-
------------------------------TASK_3
-ALTER TRIGGER T3
-ON Customers
-AFTER INSERT
-AS
-BEGIN
-DECLARE @Count INT;
-SET @Count = 0;
-PRINT @Count;
-SELECT *FROM inserted;
-SET @Count = (SELECT COUNT(Email)FROM inserted WHERE dbo.CheckCustomerExist_(Email)='True');
-SELECT *FROM inserted;
-PRINT @Count;
-IF(@Count != 0)
-BEGIN
-	RAISERROR ( 'You can not add new customer, email must be unique',0,2);
-	ROLLBACK TRAN;
-END
-END
+-----------------------------------TASK_3_V2 <<<------------
+---------------- ÄÐÓÃÀ ÂÅÐÑ²ß ÒÐÈÃÅÐÀ, ÂÎÍÀ ÍÅ ÊÈÄÀª ÏÎÌÈËÊÓ 
+---------------- Ó ÐÀÇ² ÎÄÍÀÊÎÂÈÕ ÅÌÅÉË²Â, ÏÐÎÑÒÎ ÑÊ²ÏÀª ¯Õ 
+---------------- ÕÎ×À ÏÐÎ ÊÈÄÀÍÍß ÏÎÌÈËÊÈ Ó ÇÀÂÄÀÍÍ² Í²×ÎÃÎ ÍÅ ÑÊÀÇÀÍÎ
+--GO
+--CREATE TRIGGER T3
+--ON Customers
+--INSTEAD OF INSERT
+--AS
+--BEGIN
+--BEGIN TRAN;
+--INSERT Customers ([Name],Surname,Patronymic,Email,Phone,[Percent Discount] )
+--SELECT [Name],Surname,Patronymic,Email,Phone,[Percent Discount] 
+--FROM inserted AS I1
+--WHERE dbo.CheckCustomerExist_(I1.Email)='False' AND (SELECT COUNT(Email) FROM inserted AS I2 WHERE I2.Email = I1.Email)=1
+--COMMIT
+--END
 ----------------TEST 
 ----------------|||||||
 ----------------VVVVV
-SELECT Email FROM Customers
 --GO
-INSERT Customers
-VALUES
-('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
-('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
-('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0)
+--INSERT Customers
+--VALUES
+--('Oleg','Olegenko','Olegovich','OlegO@ukr.net','+380687559823',0),
+--('Oleg','Olegenko','Olegovich','OlegO1@ukr.net','+380687559823',0),
+--('Oleg','Olegenko','Olegovich','OlegO1@ukr.net','+380687559823',0)
 
+---------------------------------TASK_4
 
+--GO
+--CREATE TRIGGER T4
+--ON Customers
+--INSTEAD OF DELETE
+--AS
+--BEGIN
+--BEGIN TRAN;
+--DELETE DEL
+--FROM Customers AS DEL
+--INNER JOIN deleted ON DEL.Id=deleted.Id
+--WHERE dbo.CheckCustomerExist_(deleted.Email)='False'
+--COMMIT
+--END
+
+----------------TEST 
+----------------|||||||
+----------------VVVVV
+--GO
+--SELECT* FROM Customers------V
+--GO									    -------V
+--DELETE Customers		    -------V
+--WHERE Id=664------<<<ID	   <<+ ÀÉÄÈ ßÊÎÃÎÑÜ ÊË²ªÍÒÀ
+--GO
+--SELECT * FROM Customers
+
+-------------------------TASK_5
+--GO
+--CREATE TRIGGER T5
+--ON Sales
+--AFTER INSERT
+--AS
+--BEGIN
+--UPDATE Customers
+--SET [Percent Discount] = 15
+--WHERE Customers.Email = ANY 
+--(SELECT [Customer Email]
+--FROM inserted
+--WHERE
+--inserted.[Sale Price]>50000)
+--END
+----------------TEST
+----------------|||||||
+----------------VVVVV
+--GO
+--INSERT Sales
+--VALUES
+--(1,'ASM',11,1111111,GETDATE(),'OlegO121@ukr.net')
+--GO
+--SELECT * FROM Sales
+--GO
+--SELECT * FROM Customers
+
+--------------------------TASK_6
+------BAD Manufacturer KYIV<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--GO
+--CREATE TRIGGER T6
+--ON Product
+--INSTEAD OF INSERT
+--AS
+--BEGIN
+--BEGIN TRAN
+--INSERT Product ([Name],QP_Avaiable,Cost,Manufacturer,[Sale Price])
+--SELECT [Name],QP_Avaiable,Cost,Manufacturer,[Sale Price] FROM inserted
+--WHERE inserted.Manufacturer!='KYIV'
+--COMMIT
+--END
+----------------TEST
+----------------|||||||
+----------------VVVVV
+--GO
+--INSERT Product
+--VALUES
+--('AS',12,23,'KYIV',232),
+--('AS',12,23,'KYIVS',232)
+--GO
+--SELECT * FROM Product
+
+------------------------------TASK_7
+--GO
+--CREATE TRIGGER T7
+--ON Sales
+--INSTEAD OF INSERT
+--AS
+--BEGIN
+--BEGIN TRAN
+--INSERT Sales([Product Id],[Name],Quantity,[Sale Price],[Sale Date],[Customer Email])
+--SELECT [Product Id],[Name],Quantity,[Sale Price],[Sale Date],[Customer Email] FROM inserted
+--WHERE inserted.Quantity > 0
+--COMMIT
+--END
+
+----------------TEST
+----------------|||||||
+----------------VVVVV
+--GO
+--INSERT Product
+--VALUES('Apple',0,0,'SASFDG',12)
+--GO
+--SELECT * FROM Product
+--GO
+--INSERT Sales ([Product Id],[Name],Quantity,[Sale Price],[Sale Date])
+--VALUES (3--<<<<< ID ÏÐÎÄÓÊÒÀ ÑÒÂÎÐÅÍÎÃÎ ÂÈÙÅ ^^^
+--,'Apple',0,10,GETDATE())
+--GO
+--SELECT * FROM Sales
+--GO
+--SELECT * FROM Archive
 -----------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
-
---ÙÅ ÏÐÀÖÞÞ ÍÀÄ ÖÈÌ ÇÀÂÄÀÍÍßÌ 
+--+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
