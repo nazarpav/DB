@@ -76,36 +76,8 @@
 --[Date] DATE NOT NULL DEFAULT GETDATE()
 --)
 
---GO
---INSERT Product
---VALUES
---('Apple',100,10,'Kiiv',15)
 
-----------------------GO
-----------------------INSERT Customers
-----------------------VALUES
-------------------------('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0)
---------------INSERT Customers
---------------VALUES
---------------('Oleg','Olegenko','Olegovich','OlegO12@ukr.net','+380687559823',0),
---------------('Oleg','Olegenko','Olegovich','OlegO121@ukr.net','+380687559823',0),
---------------('Oleg','Olegenko','Olegovich','OlegO122@ukr.net','+380687559823',0),
---------------('Oleg','Olegenko','Olegovich','OlegO123@ukr.net','+380687559823',0)
-
-----------------------GO
-----------------------INSERT Sales ([Name],Quantity,[Sale Price],[Sale Date])
-----------------------VALUES
-----------------------('Apple',3,12,GETDATE()),
-----------------------('Banana',8,82,GETDATE()),
-----------------------('Lemon',30,332,GETDATE()),
-----------------------('Orange',6,92,GETDATE()),
-----------------------('Sausage',20,200,GETDATE())
-
-----------------------GO
-----------------------INSERT Sales
-----------------------VALUES
-----------------------('Melon',2,50,GETDATE(),'OlegO12@ukr.net')
-
+----------------------TASK_1
 --GO
 --CREATE TRIGGER T1
 --ON Sales

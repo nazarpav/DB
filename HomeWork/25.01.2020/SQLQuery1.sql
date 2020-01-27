@@ -1,0 +1,232 @@
+--+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+--
+--CREATE DATABASE STSHOP2
+--GO
+--USE STSHOP2
+--GO
+--CREATE FUNCTION CheckCustomerExist_ (
+--    @Email_ NVARCHAR(75)
+--)
+--RETURNS VARCHAR(5)
+--AS
+--BEGIN
+--    IF EXISTS (SELECT* FROM Customers WHERE Customers.Email = @Email_)
+--        return 'True'
+--    return 'False'
+--END
+--GO
+--CREATE TABLE Employees
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--Surname NVARCHAR(100) NOT NULL CHECK (Surname!=''),
+--Patronymic NVARCHAR(100) NOT NULL CHECK (Patronymic!=''),
+--Position NVARCHAR(30) NOT NULL CHECK (Position!=''),
+--[Date of recruitment] DATE NOT NULL DEFAULT GETDATE(),
+--Salary INT NOT NULL DEFAULT 0 
+--)
+--GO
+--CREATE TABLE Product
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--QP_Avaiable INT NOT NULL,
+--Cost INT NOT NULL,
+--Manufacturer NVARCHAR(150) NOT NULL CHECK (Manufacturer!=''),
+--[Sale Price] INT NOT NULL
+--)
+--GO
+--CREATE TABLE Sales
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Product Id] INT NOT NULL FOREIGN KEY REFERENCES Product,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--Quantity INT NOT NULL ,
+--[Sale Price] INT NOT NULL CHECK([Sale Price]>0),
+--[Sale Date] DATE NOT NULL,
+--[Customer Email] NVARCHAR(75) NOT NULL DEFAULT 'Unregistered User'
+--CHECK(dbo.CheckCustomerExist_([Customer Email]) = 'True' OR [Customer Email]='Unregistered User'),
+--EmployeeId INT NOT NULL FOREIGN KEY REFERENCES Employees
+--)
+--GO
+--CREATE TABLE Customers
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--Surname NVARCHAR(100) NOT NULL CHECK (Surname!=''),
+--Patronymic NVARCHAR(100) NOT NULL CHECK (Patronymic!=''),
+--Email NVARCHAR(75) NOT NULL CHECK (Email!=''),
+--Phone NVARCHAR(15) NOT NULL CHECK (Phone!=''),
+--[Percent Discount] INT NOT NULL CHECK([Percent Discount]>=0AND[Percent Discount]<=100)
+--)
+--GO
+--CREATE TABLE History
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--Quantity INT NOT NULL CHECK(Quantity>0),
+--[Sale Price] INT NOT NULL CHECK([Sale Price]>0),
+--[Sale Date] DATE NOT NULL,
+--[Customer Email] NVARCHAR(75) NOT NULL DEFAULT 'Unregistered User'
+--CHECK(dbo.CheckCustomerExist_([Customer Email]) = 'True' OR [Customer Email]='Unregistered User')
+--)
+
+--GO
+--CREATE TABLE Archive
+--(
+--Id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+--[Name] NVARCHAR(100) NOT NULL CHECK ([Name]!=''),
+--QP_Avaiable INT NOT NULL,
+--Cost INT NOT NULL,
+--Manufacturer NVARCHAR(150) NOT NULL CHECK (Manufacturer!=''),
+--[Sale Price] INT NOT NULL,
+--[Date] DATE NOT NULL DEFAULT GETDATE()
+--)
+
+--INSERT Product
+--VALUES
+--('Apple',12,123,'HARKIV',163),
+--('Apple1',121,1213,'HARKIV',1163),
+--('Apple2',122,1223,'HARKIV',1263),
+--('Apple3',123,1233,'HARKIV',1263),
+--('Apple4',124,1243,'HARKIV',1363)
+--GO
+--INSERT Employees
+--VALUES
+--('ROB','ROBEREN','ROROVICH','Consultant',GETDATE(),1000)
+--GO
+--INSERT Customers
+--VALUES
+--('OLEH','OLEG','OLEJEVICH','OLEJIK@SOBAKA.NET','+4823455423',0)
+--GO
+--INSERT Sales
+--VALUES
+--(1,'Apple',11,123,GETDATE(),'Unregistered User',1),
+--(1,'Apple',11,123,GETDATE(),'OLEJIK@SOBAKA.NET',1),
+--(1,'Apple',11,1234,GETDATE(),'OLEJIK@SOBAKA.NET',1)
+
+-----------------------------TASK_1
+
+--GO
+--ALTER FUNCTION T1_F
+--(
+--@Name NVARCHAR(100),
+--@Surname NVARCHAR(100),
+--@Patronymic NVARCHAR(100)
+--)
+--RETURNS TABLE
+--AS
+--RETURN (
+--SELECT S.Id,S.[Product Id],S.[Name],S.Quantity,S.[Sale Price],S.[Sale Date],S.[Customer Email],S.EmployeeId
+--FROM Sales AS S
+--INNER JOIN Employees AS E ON E.Id=S.EmployeeId
+--WHERE 
+--E.[Name]=@Name AND
+--E.Surname = @Surname AND
+--E.Patronymic = @Patronymic AND
+--S.[Sale Price] = ANY 
+--(
+--SELECT MIN([Sale Price])
+--FROM Sales 
+--INNER JOIN Employees AS E_ ON E_.Id=EmployeeId
+--WHERE 
+--E_.[Name]=@Name AND
+--E_.Surname = @Surname AND
+--E_.Patronymic = @Patronymic)
+--)
+-----------------------TEST
+-------------------------vvv
+--GO
+--SELECT * FROM T1_F('ROB','ROBEREN','ROROVICH')
+
+------------------------TASK_2
+--GO
+--CREATE FUNCTION T2_F(@Email_ NVARCHAR(75))
+--RETURNS TABLE
+--AS
+--RETURN (
+--SELECT *
+--FROM Sales
+--WHERE 
+--Sales.[Customer Email]=@Email_ AND
+--Sales.[Sale Price]= ANY (SELECT MIN([Sale Price])FROM Sales WHERE [Customer Email]='OLEJIK@SOBAKA.NET')
+--)
+-----------------------TEST
+-------------------------vvv
+--SELECT * FROM T1_F('OLEJIK@SOBAKA.NET')
+
+-----------------TASK_3
+--GO
+--CREATE FUNCTION T3_F
+--(@PNAME NVARCHAR(75))
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--SELECT * FROM Sales WHERE [Name]=@PNAME
+--)
+-------------TEST
+--------------VVV
+--GO
+--SELECT * FROM T3_F('Apple')
+
+-----------------------------TASK_4
+--GO
+--INSERT Customers
+--VALUES
+--('RON','QWERTY','BALABK','ASDF@ASDF.NET','+2123454245',0),
+--('ROB','QWERTY','BALABK','ASDFH@ASDF.NET','+2123454245',0),
+--('ROT','QWERTY','BALABK','ASDFG@ASDF.NET','+2123454245',0),
+--('ROF','QWERTY','BALABK','ASDFJ@ASDF.NET','+2123454245',0),
+--('ROD','QWERTY','BALABK','ASDFK@ASDF.NET','+2123454245',0),
+--('ROE','QWERTY2','BALABKJ','ASDFE@ASDF.NET','+2123454245',0),
+--('ROS','QWERTY2','BALABKG','ASDFR@ASDF.NET','+2123454245',0),
+--('ROW','QWERTY2','BALABKNN','ASDTF@ASDF.NET','+2123454245',0)
+--GO
+--CREATE FUNCTION T4_F ()
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--SELECT *
+--FROM Customers
+--WHERE Surname= ANY
+--(SELECT C.Surname
+--FROM Customers AS C
+--GROUP BY C.Surname
+--HAVING COUNT(C.Surname)>1)
+--)
+-----------------TEST
+------------------VVV
+--GO
+--SELECT * FROM T4_F()
+
+-----------------------TASK_5
+--GO
+--ALTER FUNCTION T5_F
+--(@Manufacturer NVARCHAR(150))
+--RETURNS INT
+--AS
+--BEGIN 
+--DECLARE @COUNT INT;
+--SET @COUNT = (SELECT AVG([Sale Price]) FROM Product WHERE Manufacturer = @Manufacturer)
+--RETURN
+--(
+--@COUNT
+--)
+--END
+-------------------TEST
+--------------------VVV
+--GO
+--EXECUTE T5_F('HARKIV')
+
+----------------------TASK_6
+GO
+-----------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
+--+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+--CREATE FUNCTION CheckCustomerExist_ (
+--    @Email_ NVARCHAR(75)
+--)
+--RETURNS VARCHAR(5)
+--AS
+--BEGIN
