@@ -202,25 +202,123 @@
 
 -----------------------TASK_5
 --GO
---ALTER FUNCTION T5_F
+--CREATE FUNCTION T5_F
 --(@Manufacturer NVARCHAR(150))
 --RETURNS INT
 --AS
---BEGIN 
---DECLARE @COUNT INT;
---SET @COUNT = (SELECT AVG([Sale Price]) FROM Product WHERE Manufacturer = @Manufacturer)
---RETURN
---(
---@COUNT
---)
+--BEGIN
+--RETURN (SELECT AVG([Sale Price]) FROM Product WHERE Manufacturer = @Manufacturer)
 --END
 -------------------TEST
 --------------------VVV
 --GO
---EXECUTE T5_F('HARKIV')
+--DECLARE @RES INT;
+--EXEC @RES = dbo.T5_F 'HARKIV'
+--PRINT @RES
 
 ----------------------TASK_6
-GO
+--GO
+--CREATE FUNCTION T6_F()
+--RETURNS TABLE
+--AS
+--RETURN
+--SELECT TOP(1) * FROM Sales ORDER BY [Sale Date] DESC
+------------------TEST
+--------------------VVV
+--GO
+--INSERT Sales
+--VALUES 
+--(1,'Apple',22,94,'2019-01-01','OLEJIK@SOBAKA.NET',1),
+--(1,'Apple',22,94,'2019-02-01','OLEJIK@SOBAKA.NET',1),
+--(1,'Apple',22,94,'2019-03-01','OLEJIK@SOBAKA.NET',1),
+--(1,'Apple',22,94,GETDATE(),'OLEJIK@SOBAKA.NET',1)
+--GO
+--SELECT * FROM T6_F()
+
+------------------TASK_7
+--GO
+--CREATE FUNCTION T7_F()
+--RETURNS TABLE
+--AS
+--RETURN
+--SELECT * FROM Customers WHERE [Percent Discount]>3;
+
+----------------TEST
+-----------------VVV
+--GO
+--INSERT Customers
+--VALUES
+--('N1','S1','P1','MAIL@MAIL1.MAIL','+6543456789',3),
+--('N1','S1','P1','MAIL@MAIL2.MAIL','+6543456789',4),
+--('N1','S1','P1','MAIL@MAIL3.MAIL','+6543456789',5)
+--GO
+--SELECT * FROM T7_F()
+
+-------------------------------------TASK_8
+--GO
+--CREATE FUNCTION T8_F()
+--RETURNS TABLE
+--AS
+--RETURN
+--SELECT * FROM Product WHERE Cost*2<[Sale Price];
+------------------TEST
+-------------------VVV
+--GO
+--SELECT * FROM T8_F()
+
+--------------------------------TASK_9
+--GO
+--CREATE FUNCTION T9_F(@Name NVARCHAR(150),@Surname NVARCHAR(150),@Patronymic NVARCHAR(150))
+--RETURNS TABLE
+--AS
+--RETURN
+--SELECT TOP(1) S.[Sale Date] 
+--FROM Sales AS S
+--INNER JOIN Employees AS E ON E.Id=S.EmployeeId
+--WHERE E.[Name]=@Name AND
+--E.Surname=@Surname AND
+--E.Patronymic = @Patronymic
+--ORDER BY S.[Sale Date] DESC
+----------------------TEST
+-----------------------VVV
+--GO
+--SELECT * FROM T9_F('ROB','ROBEREN','ROROVICH')
+
+-------------------------------TASK_10
+--GO
+--CREATE FUNCTION T10_F(@Email NVARCHAR(150),@TimeStart DATE,@TimeEnd DATE)
+--RETURNS TABLE
+--AS
+--RETURN 
+--SELECT * FROM Sales AS S WHERE S.[Customer Email]=@Email AND @TimeStart<S.[Sale Date]AND @TimeEnd>S.[Sale Date] 
+
+---------------------TEST
+----------------------VVV
+--GO 
+--SELECT * FROM T10_F('OLEJIK@SOBAKA.NET', '2015-01-01',GETDATE())
+
+---------------------------------TASK_11
+--GO
+--CREATE FUNCTION T11_F()
+--RETURNS INT
+--AS
+--BEGIN
+--RETURN (SELECT AVG(E.Salary) FROM Employees AS E WHERE E.Position='Consultant')
+--END
+
+---------------------------------TEST
+-----------------------------------VVV
+--GO
+--INSERT Employees
+--VALUES
+--('DON','CORLEON','QERFD','Consultant',GETDATE(),2341),
+--('DON','CORLEON','QERFD','ADMIN',GETDATE(),2341),
+--('DON','CORLEON','QERFD','Consultant',GETDATE(),2341)
+
+--GO
+--DECLARE @RES INT;
+--EXEC @RES = dbo.T11_F
+--PRINT @RES
 -----------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------
 --+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
