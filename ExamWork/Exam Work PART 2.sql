@@ -1,0 +1,54 @@
+--GO
+--CREATE UNIQUE INDEX EMPLOYEES_EMAIL_INDEXES ON EmployeeTourAgency(Email)
+--GO
+--CREATE UNIQUE INDEX CUSTOMERS_EMAIL_INDEXES ON Customers(Email)
+--GO
+--CREATE NONCLUSTERED INDEX INDEXES_PHOTOS_OF_HOTELS ON HotelsPhoto(Hotels_Id)
+--GO
+--CREATE NONCLUSTERED INDEX INDEXES_PHOTOS_OF_MONUMETS ON MonumentsPhoto(Monuments_Id)
+--GO
+--CREATE NONCLUSTERED INDEX INDEXES_MONUMETS_IN_CITIES ON Monuments(City_Id)
+--GO
+--CREATE NONCLUSTERED INDEX INDEXES_HOTELS_IN_CITIES ON Hotels(City_Id)
+--GO
+--CREATE UNIQUE INDEX ID_TOUR_IN_ARCHIV_INDEXES ON ToursArchive(Tour_Id)
+
+---+=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=+
+------------------------------------------------------------------------------------------------------------------------------------------------
+---+=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=+
+
+--USE [Around the World in 80 Days_n]
+--GO
+--CREATE USER Director WITHOUT LOGIN;
+--GO
+--GRANT ALL TO Director
+--GO
+--CREATE USER Seller WITHOUT LOGIN;
+--GO
+--GRANT SELECT ON Country TO Seller;
+--GO
+--GRANT SELECT ON Tour TO Seller;
+--GO
+--CREATE USER HR WITHOUT LOGIN;
+--GO
+--GRANT INSERT,UPDATE ON EmployeeTourAgency TO HR;
+--GO
+--CREATE USER serv_Admin WITHOUT LOGIN;
+--GO
+--ALTER ROLE [db_backupoperator] ADD MEMBER [serv_Admin];
+--GO
+--CREATE USER [Security_Admin] WITHOUT LOGIN;
+--GO
+--ALTER ROLE [db_securityadmin] ADD MEMBER [Security_Admin]
+--GO
+--CREATE USER Driver WITHOUT LOGIN;
+--GO
+--GRANT SELECT ON Transport TO Driver;
+--GO
+--GRANT SELECT ON TourRoute TO Driver;
+
+---+=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=+
+------------------------------------------------------------------------------------------------------------------------------------------------
+---+=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=++=+
+
+
