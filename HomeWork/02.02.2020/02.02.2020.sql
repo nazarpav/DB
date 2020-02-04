@@ -1,0 +1,30 @@
+-------------TASK_1
+GO
+ALTER DATABASE STSHOP
+SET RECOVERY FULL
+
+--------------TASK_2
+GO
+BACKUP DATABASE STSHOP
+TO DISK = 'D:STSHOP.bak'
+
+-------------------TASK_3
+GO
+DROP TABLE Customers
+
+--------------------TASK_4
+GO
+BACKUP LOG STSHOP
+TO DISK = 'D:STSHOP_LOG.bak'
+
+------------------TASK_5
+GO
+RESTORE DATABASE STSHOP
+FROM DISK = 'D:STSHOP.bak'
+WITH REPLACE
+
+-----------------------TASK_6
+GO
+RESTORE LOG STSHOP
+FROM DISK = 'D:STSHOP_LOG.bak'
+WITH NORECOVERY
