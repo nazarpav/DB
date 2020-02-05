@@ -1,7 +1,9 @@
+--GO
 --CREATE VIEW T_1
 --AS
 --SELECT TourRoute.[Name],Tour.Cost,Tour.EndDate,Tour.StartDate FROM Tour
 --INNER JOIN TourRoute ON Tour.TourRoute_Id=TourRoute.Id
+
 --GO
 --CREATE PROCEDURE  T_2 (@Start_Date DATE,@End_Date DATE)
 --AS
@@ -10,6 +12,7 @@
 --INNER JOIN TourRoute ON Tour.TourRoute_Id=TourRoute.Id
 --WHERE Tour.EndDate>=@End_Date AND Tour.StartDate<=@Start_Date
 --END
+
 --GO
 --CREATE PROCEDURE T_3 (@Country NVARCHAR(150))
 --AS

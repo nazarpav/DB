@@ -1,0 +1,15 @@
+------------------------TASK_1
+--GO
+--EXECUTE  sp_helpsrvrole 
+----------------------------TASK_2
+--GO
+--EXECUTE sp_srvrolepermission
+-------------------TASK_3
+--GO
+--SELECT * FROM sys.server_principals WHERE IS_SRVROLEMEMBER ( 'sysadmin' , [name] )=1
+---------------------TASK_4
+--GO
+--SELECT * FROM sys.server_principals WHERE IS_SRVROLEMEMBER ( 'dbcreator' , [name] )=1
+-------------------------TASK_5
+--GO
+--SELECT * FROM sys.server_principals WHERE  [name]='Mark' AND IS_SRVROLEMEMBER ( 'dbcreator' , [name] )=1
