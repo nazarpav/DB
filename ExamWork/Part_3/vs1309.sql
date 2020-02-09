@@ -109,14 +109,22 @@
 
 
 --------------------
-CREATE TRIGGER T_12
-ON
-INSTEAD OF INSERT
+CREATE TRIGGER T_14
+ON RoutesInTour
+INSTEAD OF DELETE
 AS
 BEGIN
-SELECT * FROM 
+UPDATE RoutesInTour
+SET IsDeleted = 1
+WHERE ID =(SELECT Id FROM DELETED)
+INSERT ToursArchive 
+VALUES 
+(0,)
+
 END
 
+
+-------------------TASK_17 «робив на пар≥ коли робили вс≥
 
 
 
